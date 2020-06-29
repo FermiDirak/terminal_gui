@@ -1,7 +1,3 @@
-extern crate termion;
-
-// use std::time::Duration;
-// use std::thread;
 use std::io::{stdin, stdout, Write};
 
 // use termion::{color, clear, cursor};
@@ -11,18 +7,25 @@ use termion::event::{Event, MouseEvent};
 use termion::input::{MouseTerminal, TermRead};
 use termion::raw::IntoRawMode;
 
+mod utils;
+
+use utils::{draw, Container};
+
 fn main() {
     let stdin = stdin();
     let mut stdout = MouseTerminal::from(stdout().into_raw_mode().unwrap());
 
-    write!(
-        stdout,
-        "{}{}q to exit.{}",
-        termion::clear::All,
-        termion::cursor::Goto(1, 1),
-        termion::cursor::Hide,
-    )
-    .unwrap();
+    draw::clear_screen(&mut stdout);
+
+    let (width, height) = termion::terminal_size().unwrap();
+    let container = Container {
+        x: 1,
+        y: 1,
+        width: width,
+        height,
+    };
+
+    draw::fill_area(&mut stdout, container);
 
     stdout.flush().unwrap();
 
@@ -48,5 +51,5 @@ fn main() {
         stdout.flush().unwrap();
     }
 
-    writeln!(stdout, "{}", termion::cursor::Show).unwrap();
+    write!(stdout, "{}", termion::cursor::Show).unwrap();
 }
