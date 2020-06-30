@@ -8,8 +8,10 @@ use termion::input::{MouseTerminal, TermRead};
 use termion::raw::IntoRawMode;
 
 mod utils;
+mod widgets;
 
 use utils::{draw, Container};
+use widgets::Header;
 
 fn main() {
     let stdin = stdin();
@@ -27,7 +29,7 @@ fn main() {
 
     draw::fill_area(&mut stdout, container);
 
-    stdout.flush().unwrap();
+    let header = stdout.flush().unwrap();
 
     for c in stdin.events() {
         let event = c.unwrap();

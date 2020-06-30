@@ -1,3 +1,4 @@
+#[derive(Debug)]
 pub struct Container {
     /// 1 indexed x start position
     pub x: u16,
