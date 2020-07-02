@@ -1,17 +1,29 @@
 use std::io::{stdin, stdout, Write};
 
-// use termion::{color, clear, cursor};
 use termion::cursor;
 use termion::event::Key;
 use termion::event::{Event, MouseEvent};
 use termion::input::{MouseTerminal, TermRead};
 use termion::raw::IntoRawMode;
 
+mod command;
 mod utils;
 mod widgets;
 
 use utils::{draw, Container};
-use widgets::{Header, Widget};
+use widgets::{Footer, FooterColorConfig, Header, HeaderColorConfig, Widget};
+
+struct ColorConfig {
+    header: HeaderColorConfig,
+    footer: FooterColorConfig,
+}
+
+struct State<'a> {
+    color_config: &'a ColorConfig,
+    container: &'a Container,
+    header_text: String,
+    input_text: String,
+}
 
 fn main() {
     let stdin = stdin();
@@ -20,19 +32,42 @@ fn main() {
     draw::clear_screen(&mut stdout);
 
     let (width, height) = termion::terminal_size().unwrap();
-    let container = Container {
-        x: 1,
-        y: 1,
-        width: width,
-        height,
+
+    let state = State {
+        color_config: &ColorConfig {
+            header: HeaderColorConfig {
+                fg: (255, 255, 255),
+                bg: (68, 71, 90),
+            },
+            footer: FooterColorConfig {
+                fg: (255, 255, 255),
+                bg: (68, 71, 90),
+            },
+        },
+        container: &Container {
+            x: 1,
+            y: 1,
+            width: width,
+            height,
+        },
+        header_text: String::from("hello world"),
+        input_text: String::from(""),
     };
 
-    let header = Header {
-        container: &container,
-        display_text: String::from("hello world"),
+    let mut header = Header {
+        container: state.container,
+        color_config: &state.color_config.header,
+        display_text: state.header_text,
+    };
+
+    let mut footer = Footer {
+        container: state.container,
+        color_config: &state.color_config.footer,
+        input_text: state.input_text,
     };
 
     header.draw(&mut stdout);
+    footer.draw(&mut stdout);
 
     stdout.flush().unwrap();
 
@@ -57,6 +92,6 @@ fn main() {
 
         stdout.flush().unwrap();
     }
-
+    draw::clear_screen(&mut stdout);
     write!(stdout, "{}", termion::cursor::Show).unwrap();
 }
