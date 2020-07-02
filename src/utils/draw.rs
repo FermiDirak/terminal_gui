@@ -29,10 +29,23 @@ pub fn fill_area<W: Write>(stdout: &mut W, container: &Container) {
             stdout,
             "{}{}{}{}",
             cursor::Goto(x, y_curr),
-            color::Bg(termion::color::Red),
+            color::Bg(color::Red),
             spaces,
             color::Bg(color::Reset),
         )
         .unwrap();
     }
+}
+
+pub fn write_text<W: Write>(stdout: &mut W, text: &String, pos: (u16, u16)) {
+    let (x, y) = pos;
+    write!(
+        stdout,
+        "{}{}{}{}",
+        cursor::Goto(x, y),
+        color::Bg(color::Red),
+        text,
+        color::Bg(color::Reset),
+    )
+    .unwrap();
 }

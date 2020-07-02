@@ -27,9 +27,9 @@ fn main() {
         height,
     };
 
-    let mut header = Header {
+    let header = Header {
         container: &container,
-        displayText: String::from("hello world"),
+        display_text: String::from("hello world"),
     };
 
     header.draw(&mut stdout);
