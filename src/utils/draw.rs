@@ -15,13 +15,13 @@ pub fn clear_screen<W: Write>(stdout: &mut W) {
     .unwrap();
 }
 
-pub fn fill_area<W: Write>(stdout: &mut W, container: Container) {
+pub fn fill_area<W: Write>(stdout: &mut W, container: &Container) {
     let Container {
         x,
         y,
         width,
         height,
-    } = container;
+    } = *container;
     let spaces = " ".repeat(width.into());
 
     for y_curr in y..y + height {

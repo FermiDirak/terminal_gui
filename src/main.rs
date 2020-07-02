@@ -11,7 +11,7 @@ mod utils;
 mod widgets;
 
 use utils::{draw, Container};
-use widgets::Header;
+use widgets::{Header, Widget};
 
 fn main() {
     let stdin = stdin();
@@ -27,9 +27,14 @@ fn main() {
         height,
     };
 
-    draw::fill_area(&mut stdout, container);
+    let mut header = Header {
+        container: &container,
+        displayText: String::from("hello world"),
+    };
 
-    let header = stdout.flush().unwrap();
+    header.draw(&mut stdout);
+
+    stdout.flush().unwrap();
 
     for c in stdin.events() {
         let event = c.unwrap();

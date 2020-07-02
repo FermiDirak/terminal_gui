@@ -1,6 +1,6 @@
-use termion::event::Event;
+use std::io::Write;
 
 pub trait Widget {
     /// draw the widget via TTY
-    fn draw(&mut self, event: Event);
+    fn draw<W: Write>(&mut self, stdout: &mut W);
 }

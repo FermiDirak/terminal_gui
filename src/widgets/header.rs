@@ -1,25 +1,22 @@
 use std::io::Write;
 
-use termion::event::Event;
-
 use super::super::utils::{draw, Container};
 use super::widget::Widget;
 
 #[derive(Debug)]
-pub struct Header<W: Write> {
-    pub container: Container,
+pub struct Header<'a> {
+    pub container: &'a Container,
     pub displayText: String,
-    pub stdout: W,
 }
 
-impl<W: Write> Widget for Header<W> {
-    fn draw(&mut self, event: Event) {
+impl<'a> Widget for Header<'a> {
+    fn draw<W: Write>(&mut self, stdout: &mut W) {
         let header_area = Container {
             x: self.container.x,
             y: self.container.y,
             width: self.container.width,
             height: 1,
         };
-        draw::fill_area(&mut self.stdout, header_area);
+        draw::fill_area(stdout, &header_area);
     }
 }
