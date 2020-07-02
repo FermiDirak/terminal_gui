@@ -13,16 +13,16 @@ mod widgets;
 use utils::{draw, Container};
 use widgets::{Footer, FooterColorConfig, Header, HeaderColorConfig, Widget};
 
-struct ColorConfig {
-    header: HeaderColorConfig,
-    footer: FooterColorConfig,
+struct ColorConfig<'a> {
+    header: &'a HeaderColorConfig,
+    footer: &'a FooterColorConfig,
 }
 
 struct State<'a> {
-    color_config: &'a ColorConfig,
+    color_config: &'a ColorConfig<'a>,
     container: &'a Container,
     header_text: String,
-    input_text: String,
+    input_text: &'a mut String,
 }
 
 fn main() {
@@ -32,14 +32,13 @@ fn main() {
     draw::clear_screen(&mut stdout);
 
     let (width, height) = termion::terminal_size().unwrap();
-
-    let state = State {
+    let mut state = State {
         color_config: &ColorConfig {
-            header: HeaderColorConfig {
+            header: &HeaderColorConfig {
                 fg: (255, 255, 255),
                 bg: (68, 71, 90),
             },
-            footer: FooterColorConfig {
+            footer: &FooterColorConfig {
                 fg: (255, 255, 255),
                 bg: (68, 71, 90),
             },
@@ -51,24 +50,23 @@ fn main() {
             height,
         },
         header_text: String::from("hello world"),
-        input_text: String::from(""),
+        input_text: &mut String::from(""),
     };
 
     let mut header = Header {
         container: state.container,
-        color_config: &state.color_config.header,
+        color_config: state.color_config.header,
         display_text: state.header_text,
     };
 
     let mut footer = Footer {
         container: state.container,
-        color_config: &state.color_config.footer,
-        input_text: state.input_text,
+        color_config: state.color_config.footer,
+        input_text: state.input_text.clone(),
     };
 
     header.draw(&mut stdout);
     footer.draw(&mut stdout);
-
     stdout.flush().unwrap();
 
     for c in stdin.events() {
@@ -77,7 +75,11 @@ fn main() {
         match event {
             Event::Key(key) => match key {
                 Key::Char('q') => break,
-                Key::Char(key) => write!(stdout, "{}", key).unwrap(),
+                Key::Char(key) => {
+                    write!(stdout, "{}", key).unwrap();
+                    state.input_text.push(key);
+                    footer.update(state.input_text.clone());
+                }
                 Key::Ctrl(key) => write!(stdout, "Ctrl-{}", key).unwrap(),
                 Key::Left => write!(stdout, "<left>").unwrap(),
                 _ => {}
@@ -90,6 +92,8 @@ fn main() {
             Event::Unsupported(_) => {}
         }
 
+        header.draw(&mut stdout);
+        footer.draw(&mut stdout);
         stdout.flush().unwrap();
     }
     draw::clear_screen(&mut stdout);

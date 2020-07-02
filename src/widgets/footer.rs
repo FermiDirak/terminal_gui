@@ -16,6 +16,12 @@ pub struct Footer<'a> {
     pub input_text: String,
 }
 
+impl<'a> Footer<'a> {
+    pub fn update(&mut self, input_text: String) {
+        self.input_text = input_text;
+    }
+}
+
 impl<'a> Widget for Footer<'a> {
     fn draw<W: Write>(&self, stdout: &mut W) {
         let Footer {
