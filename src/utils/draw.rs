@@ -44,7 +44,7 @@ pub fn fill_area<W: Write>(stdout: &mut W, container: &Container, bg: Color) {
     }
 }
 
-pub fn write_text<W: Write>(stdout: &mut W, text: &String, pos: (u16, u16), fg: Color, bg: Color) {
+pub fn write_text<W: Write>(stdout: &mut W, text: String, pos: (u16, u16), fg: Color, bg: Color) {
     let (x, y) = pos;
     write!(
         stdout,

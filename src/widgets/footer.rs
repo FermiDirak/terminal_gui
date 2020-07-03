@@ -9,9 +9,8 @@ pub struct FooterColorConfig {
     pub bg: draw::Color,
 }
 
-#[derive(Debug)]
 pub struct Footer<'a> {
-    pub container: &'a Container,
+    pub container: Container,
     pub color_config: &'a FooterColorConfig,
     pub input_text: String,
 }
@@ -22,8 +21,8 @@ impl<'a> Footer<'a> {
     }
 }
 
-impl<'a> Widget for Footer<'a> {
-    fn draw<W: Write>(&self, stdout: &mut W) {
+impl<'a, W: Write> Widget<W> for Footer<'a> {
+    fn draw(&self, stdout: &mut W) {
         let Footer {
             container,
             color_config,
@@ -39,7 +38,7 @@ impl<'a> Widget for Footer<'a> {
         draw::fill_area(stdout, &footer_area, color_config.bg);
         draw::write_text(
             stdout,
-            &input_text,
+            input_text.clone(),
             (1, footer_area.y),
             color_config.fg,
             color_config.bg,

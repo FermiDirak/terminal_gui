@@ -1,6 +1,6 @@
 use std::io::Write;
 
-pub trait Widget {
+pub trait Widget<W: Write> {
     /// draw the widget via TTY
-    fn draw<W: Write>(&self, stdout: &mut W);
+    fn draw(&self, stdout: &mut W);
 }

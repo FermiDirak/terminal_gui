@@ -13,14 +13,14 @@ mod widgets;
 use utils::{draw, Container};
 use widgets::{Footer, FooterColorConfig, Header, HeaderColorConfig, Widget};
 
-struct ColorConfig<'a> {
-    header: &'a HeaderColorConfig,
-    footer: &'a FooterColorConfig,
+struct ColorConfig {
+    header: &'static HeaderColorConfig,
+    footer: &'static FooterColorConfig,
 }
 
 struct State<'a> {
-    color_config: &'a ColorConfig<'a>,
-    container: &'a Container,
+    color_config: ColorConfig,
+    container: Container,
     header_text: String,
     input_text: &'a mut String,
 }
@@ -32,8 +32,8 @@ fn main() {
     draw::clear_screen(&mut stdout);
 
     let (width, height) = termion::terminal_size().unwrap();
-    let mut state = State {
-        color_config: &ColorConfig {
+    let state = State {
+        color_config: ColorConfig {
             header: &HeaderColorConfig {
                 fg: (255, 255, 255),
                 bg: (68, 71, 90),
@@ -43,7 +43,7 @@ fn main() {
                 bg: (68, 71, 90),
             },
         },
-        container: &Container {
+        container: Container {
             x: 1,
             y: 1,
             width: width,
@@ -53,18 +53,19 @@ fn main() {
         input_text: &mut String::from(""),
     };
 
-    let mut header = Header {
-        container: state.container,
+    let header = Header {
+        container: state.container.clone(),
         color_config: state.color_config.header,
         display_text: state.header_text,
     };
 
     let mut footer = Footer {
-        container: state.container,
+        container: state.container.clone(),
         color_config: state.color_config.footer,
-        input_text: state.input_text.clone(),
+        input_text: state.input_text.to_string(),
     };
 
+    draw::clear_screen(&mut stdout);
     header.draw(&mut stdout);
     footer.draw(&mut stdout);
     stdout.flush().unwrap();
@@ -72,16 +73,18 @@ fn main() {
     for c in stdin.events() {
         let event = c.unwrap();
 
+        let mut inputted_command = None;
+
         match event {
             Event::Key(key) => match key {
-                Key::Char('q') => break,
-                Key::Char(key) => {
-                    write!(stdout, "{}", key).unwrap();
-                    state.input_text.push(key);
-                    footer.update(state.input_text.clone());
+                Key::Ctrl('c') => break,
+                Key::Char('\n') => {
+                    inputted_command = command::parse_input(&state.input_text);
+                    state.input_text.clear();
                 }
-                Key::Ctrl(key) => write!(stdout, "Ctrl-{}", key).unwrap(),
-                Key::Left => write!(stdout, "<left>").unwrap(),
+                Key::Char(key) => {
+                    state.input_text.push(key);
+                }
                 _ => {}
             },
             Event::Mouse(me) => match me {
@@ -92,9 +95,17 @@ fn main() {
             Event::Unsupported(_) => {}
         }
 
+        footer.update(state.input_text.clone());
+
+        draw::clear_screen(&mut stdout);
         header.draw(&mut stdout);
         footer.draw(&mut stdout);
         stdout.flush().unwrap();
+
+        match inputted_command {
+            Some(command::CommandKind::Quit) => break,
+            _ => {}
+        }
     }
     draw::clear_screen(&mut stdout);
     write!(stdout, "{}", termion::cursor::Show).unwrap();

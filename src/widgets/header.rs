@@ -12,13 +12,13 @@ pub struct HeaderColorConfig {
 
 #[derive(Debug)]
 pub struct Header<'a> {
-    pub container: &'a Container,
+    pub container: Container,
     pub color_config: &'a HeaderColorConfig,
     pub display_text: String,
 }
 
-impl<'a> Widget for Header<'a> {
-    fn draw<W: Write>(&self, stdout: &mut W) {
+impl<'a, W: Write> Widget<W> for Header<'a> {
+    fn draw(&self, stdout: &mut W) {
         let Header {
             container,
             color_config,
@@ -37,7 +37,7 @@ impl<'a> Widget for Header<'a> {
         draw::fill_area(stdout, &header_area, color_config.bg);
         draw::write_text(
             stdout,
-            &display_text,
+            display_text.clone(),
             (text_x_start, header_area.y),
             color_config.fg,
             color_config.bg,
