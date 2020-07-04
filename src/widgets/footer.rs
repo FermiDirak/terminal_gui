@@ -10,15 +10,9 @@ pub struct FooterColorConfig {
 }
 
 pub struct Footer<'a> {
-    pub container: Container,
+    pub container: &'a Container,
     pub color_config: &'a FooterColorConfig,
-    pub input_text: String,
-}
-
-impl<'a> Footer<'a> {
-    pub fn update(&mut self, input_text: String) {
-        self.input_text = input_text;
-    }
+    pub input_text: &'a str,
 }
 
 impl<'a, W: Write> Widget<W> for Footer<'a> {
@@ -38,7 +32,7 @@ impl<'a, W: Write> Widget<W> for Footer<'a> {
         draw::fill_area(stdout, &footer_area, color_config.bg);
         draw::write_text(
             stdout,
-            input_text.clone(),
+            input_text.to_string(),
             (1, footer_area.y),
             color_config.fg,
             color_config.bg,
