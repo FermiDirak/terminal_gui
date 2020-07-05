@@ -1,4 +1,5 @@
 use std::io::{stdin, stdout, Write};
+use std::path::Path;
 
 use termion::cursor;
 use termion::event::Key;
@@ -7,9 +8,11 @@ use termion::input::{MouseTerminal, TermRead};
 use termion::raw::IntoRawMode;
 
 mod command;
+mod data;
 mod utils;
 mod widgets;
 
+use data::Todo;
 use utils::{draw, Container};
 use widgets::{Footer, FooterColorConfig, Header, HeaderColorConfig, Widget};
 
