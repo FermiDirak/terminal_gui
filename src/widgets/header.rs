@@ -1,7 +1,6 @@
 use std::convert::TryFrom;
-use std::io::Write;
 
-use super::super::utils::{draw, Container};
+use super::super::tgui::{draw, Container, Write};
 use super::widget::Widget;
 
 #[derive(Debug)]
@@ -17,8 +16,8 @@ pub struct Header<'a> {
     pub display_text: &'a str,
 }
 
-impl<'a, W: Write> Widget<W> for Header<'a> {
-    fn draw(&self, stdout: &mut W) {
+impl<'a> Widget for Header<'a> {
+    fn draw(&self, stdout: &mut Write) {
         let Header {
             container,
             color_config,

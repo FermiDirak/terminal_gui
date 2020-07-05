@@ -1,5 +1,4 @@
-use std::io::{stdin, stdout, Write};
-use std::path::Path;
+use std::io::{stdin, stdout, Write as _};
 
 use termion::cursor;
 use termion::event::Key;
@@ -9,11 +8,10 @@ use termion::raw::IntoRawMode;
 
 mod command;
 mod data;
-mod utils;
+mod tgui;
 mod widgets;
 
-use data::Todo;
-use utils::{draw, Container};
+use tgui::{draw, Container, Write};
 use widgets::{Footer, FooterColorConfig, Header, HeaderColorConfig, Widget};
 
 struct ColorConfig {
@@ -95,7 +93,7 @@ fn main() {
     write!(stdout, "{}", termion::cursor::Show).unwrap();
 }
 
-fn draw_ui<W: Write>(state: &State, stdout: &mut W) {
+fn draw_ui(state: &State, stdout: &mut Write) {
     let header = Header {
         container: &state.container,
         color_config: state.color_config.header,

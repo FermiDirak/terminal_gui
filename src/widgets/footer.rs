@@ -1,6 +1,4 @@
-use std::io::Write;
-
-use super::super::utils::{draw, Container};
+use super::super::tgui::{draw, Container, Write};
 use super::widget::Widget;
 
 #[derive(Debug)]
@@ -15,8 +13,8 @@ pub struct Footer<'a> {
     pub input_text: &'a str,
 }
 
-impl<'a, W: Write> Widget<W> for Footer<'a> {
-    fn draw(&self, stdout: &mut W) {
+impl<'a> Widget for Footer<'a> {
+    fn draw(&self, stdout: &mut Write) {
         let Footer {
             container,
             color_config,

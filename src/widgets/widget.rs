@@ -1,6 +1,6 @@
-use std::io::Write;
+use super::super::tgui::Write;
 
-pub trait Widget<W: Write> {
+pub trait Widget {
     /// draw the widget via TTY
-    fn draw(&self, stdout: &mut W);
+    fn draw(&self, stdout: &mut Write);
 }

@@ -1,8 +1,8 @@
-use std::io::Write;
-
+use std::io::Write as _;
 use termion::{clear, color, cursor};
 
-use super::container::Container;
+use super::Container;
+use super::Write;
 
 pub type Color = (u8, u8, u8);
 
@@ -11,7 +11,7 @@ pub fn create_termion_rgb(color: Color) -> termion::color::Rgb {
     return color::Rgb(r, g, b);
 }
 
-pub fn clear_screen<W: Write>(stdout: &mut W) {
+pub fn clear_screen(stdout: &mut Write) {
     write!(
         stdout,
         "{}{}{}",
@@ -22,7 +22,7 @@ pub fn clear_screen<W: Write>(stdout: &mut W) {
     .unwrap();
 }
 
-pub fn fill_area<W: Write>(stdout: &mut W, container: &Container, bg: Color) {
+pub fn fill_area(stdout: &mut Write, container: &Container, bg: Color) {
     let Container {
         x,
         y,
@@ -44,7 +44,7 @@ pub fn fill_area<W: Write>(stdout: &mut W, container: &Container, bg: Color) {
     }
 }
 
-pub fn write_text<W: Write>(stdout: &mut W, text: String, pos: (u16, u16), fg: Color, bg: Color) {
+pub fn write_text(stdout: &mut Write, text: String, pos: (u16, u16), fg: Color, bg: Color) {
     let (x, y) = pos;
     write!(
         stdout,

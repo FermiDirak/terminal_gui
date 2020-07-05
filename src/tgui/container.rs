@@ -13,8 +13,8 @@ pub struct Container {
 impl Default for Container {
     fn default() -> Container {
         Container {
-            x: 0,
-            y: 0,
+            x: 1,
+            y: 1,
             width: 0,
             height: 0,
         }
