@@ -1,5 +1,5 @@
+use super::super::tgui::widget::Widget;
 use super::super::tgui::{draw, Container, Write};
-use super::widget::Widget;
 
 #[derive(Debug)]
 pub struct FooterColorConfig {

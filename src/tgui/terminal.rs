@@ -1,7 +1,9 @@
 use std::io::{stdin, stdout, Stdin, Stdout};
+use termion::event::Event;
 use termion::input::{MouseTerminal, TermRead};
 use termion::raw::{IntoRawMode, RawTerminal};
 
+use super::super::WidgetContainer;
 use super::draw;
 use super::Container;
 
@@ -10,7 +12,8 @@ pub type Write = MouseTerminal<RawTerminal<Stdout>>;
 pub struct Terminal<'a> {
     pub stdout: Write,
     pub container: Container,
-    pub draw: &'a dyn Fn(termion::event::Event),
+    pub draw: &'a dyn Fn(Event),
+    pub components_fn: &'a dyn Fn(&Container) -> WidgetContainer,
 }
 
 impl<'a> Terminal<'a> {
@@ -21,22 +24,36 @@ impl<'a> Terminal<'a> {
             (self.draw)(event);
         }
 
+        let widget_container = (self.components_fn)(&self.container);
+
         // draw::clear_screen(&mut self.stdout);
         // write!(stdout, "{}", termion::cursor::Show).unwrap();
     }
 }
 
 pub struct TerminalBuilder<'a> {
-    pub draw: &'a dyn Fn(termion::event::Event),
+    pub draw: &'a dyn Fn(Event),
+    pub components_fn: &'a dyn Fn(&Container) -> WidgetContainer,
 }
 
 impl<'a> TerminalBuilder<'a> {
     pub fn new() -> Self {
-        TerminalBuilder { draw: &|_| {} }
+        TerminalBuilder {
+            draw: &|_| {},
+            components_fn: &|_| WidgetContainer::default(),
+        }
     }
 
-    pub fn draw(&mut self, draw_fn: &'a dyn Fn(termion::event::Event)) -> &mut Self {
+    pub fn draw(&mut self, draw_fn: &'a dyn Fn(Event)) -> &mut Self {
         self.draw = draw_fn;
+        self
+    }
+
+    pub fn register_components(
+        &mut self,
+        components_fn: &'a dyn Fn(&Container) -> WidgetContainer,
+    ) -> &mut Self {
+        self.components_fn = components_fn;
         self
     }
 
@@ -52,6 +69,7 @@ impl<'a> TerminalBuilder<'a> {
                 height,
             },
             draw: self.draw,
+            components_fn: self.components_fn,
         }
     }
 }

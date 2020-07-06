@@ -1,36 +1,30 @@
-use std::io::{stdin, stdout, Write as _};
+use std::io::{stdout, Write};
 
 use termion::cursor;
 use termion::event::Key;
 use termion::event::{Event, MouseEvent};
-use termion::input::{MouseTerminal, TermRead};
-use termion::raw::IntoRawMode;
 
 mod command;
 mod data;
 mod tgui;
 mod widgets;
 
-use tgui::{draw, Container, Write};
-use widgets::{Footer, FooterColorConfig, Header, HeaderColorConfig, Widget};
+use tgui::widget::WidgetContainer;
+use tgui::{Container, TerminalBuilder};
+use widgets::{Footer, FooterColorConfig, Header, HeaderColorConfig};
 
 struct ColorConfig {
     header: &'static HeaderColorConfig,
     footer: &'static FooterColorConfig,
 }
 
-struct State<'a> {
+struct State {
     color_config: ColorConfig,
-    container: Container,
     header_text: String,
-    input_text: &'a mut String,
+    input_text: String,
 }
 
 fn main() {
-    let stdin = stdin();
-    let mut stdout = MouseTerminal::from(stdout().into_raw_mode().unwrap());
-
-    let (width, height) = termion::terminal_size().unwrap();
     let state = State {
         color_config: ColorConfig {
             header: &HeaderColorConfig {
@@ -42,72 +36,62 @@ fn main() {
                 bg: (68, 71, 90),
             },
         },
-        container: Container {
-            x: 1,
-            y: 1,
-            width: width,
-            height,
-        },
         header_text: String::from("hello world"),
-        input_text: &mut String::from(""),
+        input_text: String::from(""),
     };
 
-    draw_ui(&state, &mut stdout);
+    let components_fn = |container: &Container| {
+        let header = Header {
+            container: &container,
+            color_config: state.color_config.header,
+            display_text: &state.header_text,
+        };
+        let footer = Footer {
+            container: &container,
+            color_config: state.color_config.footer,
+            input_text: &state.input_text,
+        };
 
-    for c in stdin.events() {
-        let event = c.unwrap();
+        let mut widget_container = WidgetContainer::default();
+        widget_container.register(Box::new(&header));
+        widget_container.register(Box::new(&footer));
 
-        let mut inputted_command = None;
-
-        match event {
-            Event::Key(key) => match key {
-                Key::Ctrl('c') => break,
-                Key::Char('\n') => {
-                    inputted_command = command::parse_input(&state.input_text);
-                    state.input_text.clear();
-                }
-                Key::Delete | Key::Backspace => {
-                    state.input_text.pop();
-                }
-                Key::Char(key) => {
-                    state.input_text.push(key);
-                }
-                _ => {}
-            },
-            Event::Mouse(me) => match me {
-                MouseEvent::Press(_, a, b) => write!(stdout, "{}", cursor::Goto(a, b)).unwrap(),
-                MouseEvent::Release(a, b) => write!(stdout, "{}", cursor::Goto(a, b)).unwrap(),
-                MouseEvent::Hold(a, b) => write!(stdout, "{}", cursor::Goto(a, b)).unwrap(),
-            },
-            Event::Unsupported(_) => {}
-        }
-
-        draw_ui(&state, &mut stdout);
-
-        match inputted_command {
-            Some(command::CommandKind::Quit) => break,
-            _ => {}
-        }
-    }
-    draw::clear_screen(&mut stdout);
-    write!(stdout, "{}", termion::cursor::Show).unwrap();
-}
-
-fn draw_ui(state: &State, stdout: &mut Write) {
-    let header = Header {
-        container: &state.container,
-        color_config: state.color_config.header,
-        display_text: &state.header_text,
+        widget_container
     };
 
-    let footer = Footer {
-        container: &state.container,
-        color_config: state.color_config.footer,
-        input_text: state.input_text,
-    };
+    let terminal = TerminalBuilder::new()
+        .register_components(&components_fn)
+        .draw(&|event: Event| {
+            // let mut inputted_command = None;
 
-    draw::clear_screen(stdout);
-    header.draw(stdout);
-    footer.draw(stdout);
-    stdout.flush().unwrap();
+            // match event {
+            //     Event::Key(key) => match key {
+            //         Key::Ctrl('c') => std::process::exit(0),
+            //         Key::Char('\n') => {
+            //             inputted_command = command::parse_input(&state.input_text);
+            //             state.input_text.clear();
+            //         }
+            //         Key::Delete | Key::Backspace => {
+            //             state.input_text.pop();
+            //         }
+            //         Key::Char(key) => {
+            //             state.input_text.push(key);
+            //         }
+            //         _ => {}
+            //     },
+            //     // Event::Mouse(me) => write!(stdout, "{}", cursor::Goto(0, 0)).unwrap(),
+            //     // Event::Unsupported(_) => {}
+            //     _ => {}
+            // }
+
+            // match inputted_command {
+            //     Some(command::CommandKind::Quit) => std::process::exit(0),
+            //     _ => {}
+            // }
+        })
+        .execute();
+
+    terminal.run();
+
+    // write!(stdout, "{}", termion::cursor::Show).unwrap();
 }
